@@ -163,18 +163,21 @@
     CGFloat mainScreenWidth = mainScreen.bounds.size.width;
 
     int limit = MAX(mainScreenHeight,mainScreenWidth);
+    CGFloat scale = [mainScreen scale];
 
-    device.iPad = (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad);
-    device.iPhone = (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone);
-    device.retina = ([mainScreen scale] == 2.0);
-    device.iPhone4 = (device.iPhone && limit == 480.0);
-    device.iPhone5 = (device.iPhone && limit == 568.0);
+    device.iPad = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad;
+    device.iPhone = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone;
+    device.retina = scale == 2.0;
+    device.iPhone4 = device.iPhone && limit == 480.0;
+    device.iPhone5 = device.iPhone && limit == 568.0;
     // note these below is not a true device detect, for example if you are on an
     // iPhone 6/6+ but the app is scaled it will prob set iPhone5 as true, but
     // this is appropriate for detecting the runtime screen environment
-    device.iPhone6 = (device.iPhone && limit == 667.0);
-    device.iPhone6Plus = (device.iPhone && limit == 736.0);
-    device.iPhoneX  = (device.iPhone && limit == 812.0);
+    device.iPhone6 = device.iPhone && limit == 667.0;
+    device.iPhone6Plus = device.iPhone && limit == 736.0;
+    device.iPhoneX  = device.iPhone && limit == 812.0;
+    device.iPhone11  = device.iPhone && limit == 896.0 && scale == 2.0;
+    device.iPhone11Max  = device.iPhone && limit == 896.0 && scale == 3.0;
 
     return device;
 }
@@ -221,14 +224,14 @@
     {
         if (device.iPhone4 || device.iPhone5 || device.iPad) {
             imageName = [imageName stringByAppendingString:@"-700"];
-        } else if(device.iPhone6) {
+        } else if(device.iPhone6 || device.iPhone6Plus) {
             imageName = [imageName stringByAppendingString:@"-800"];
-        } else if(device.iPhone6Plus || device.iPhoneX ) {
-            if(device.iPhone6Plus) {
-                imageName = [imageName stringByAppendingString:@"-800"];
-            } else {
-                imageName = [imageName stringByAppendingString:@"-1100"];
-            }
+        } else if(device.iPhoneX) {
+            imageName = [imageName stringByAppendingString:@"-1100"];
+        } else if(device.iPhone11 || device.iPhone11Max) {
+            imageName = [imageName stringByAppendingString:@"-1200"];
+        }
+        if (device.iPhone6Plus || device.iPhoneX || device.iPhone11 || device.iPhone11Max) {
             if (currentOrientation == UIInterfaceOrientationPortrait || currentOrientation == UIInterfaceOrientationPortraitUpsideDown)
             {
                 imageName = [imageName stringByAppendingString:@"-Portrait"];
@@ -244,7 +247,7 @@
     { // does not support landscape
         imageName = [imageName stringByAppendingString:@"-667h"];
     }
-    else if (device.iPhone6Plus || device.iPhoneX)
+    else if (device.iPhone6Plus || device.iPhoneX || device.iPhone11 || device.iPhone11Max)
     { // supports landscape
         if (isOrientationLocked)
         {
@@ -264,8 +267,12 @@
         }
         if (device.iPhoneX) {
             imageName = [imageName stringByAppendingString:@"-2436h"];
-        } else {
+        } else if (device.iPhone6Plus) {
             imageName = [imageName stringByAppendingString:@"-736h"];
+        } else if (device.iPhone11) {
+            imageName = [imageName stringByAppendingString:@"-1792h"];
+        } else if (device.iPhone11Max) {
+            imageName = [imageName stringByAppendingString:@"-2688h"];
         }
     }
     else if (device.iPad)
